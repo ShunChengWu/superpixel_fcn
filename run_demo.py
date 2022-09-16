@@ -1,11 +1,17 @@
+import torch,sys
+
+
+
 import argparse
 import os
 import torch.backends.cudnn as cudnn
 import models
 import torchvision.transforms as transforms
 import flow_transforms
-from scipy.ndimage import imread
-from scipy.misc import imsave
+#from scipy.ndimage import imread
+from imageio import imread,imsave
+#from scipy.misc.pilutil import imread
+#from scipy.misc import imsave
 from loss import *
 import time
 import random
@@ -32,7 +38,7 @@ results will be saved at the args.output
 '''
 
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__"))
@@ -133,6 +139,8 @@ def test(args, model, img_paths, save_path, idx):
     return toc
 
 def main():
+    print('torch. cuda', torch.cuda.is_available())
+
     global args, save_path
     data_dir = args.data_dir
     print("=> fetching img pairs in '{}'".format(data_dir))
@@ -152,7 +160,7 @@ def main():
     print('{} samples found'.format(len(tst_lst)))
 
     # create model
-    network_data = torch.load(args.pretrained)
+    network_data = torch.load(args.pretrained, map_location=torch.device('cpu'))
     print("=> using pre-trained model '{}'".format(network_data['arch']))
     model = models.__dict__[network_data['arch']]( data = network_data).cuda()
     model.eval()
